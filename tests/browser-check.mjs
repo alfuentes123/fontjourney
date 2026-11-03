@@ -15,6 +15,7 @@
 // failed, 2 tooling (Playwright/Chromium) unavailable.
 
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -391,32 +392,53 @@ test('system theme switches live without changing explicit preview colors or sel
   assert.deepStrictEqual(await readRgb(page, 'text'), [24, 23, 28]);
 });
 
-test('fonts: all 8 faces load from this origin, no external requests, works offline afterwards', async (page, { context, seen }) => {
+test('fonts: catalog is local, sample faces load, no external requests, works offline afterwards', async (page, { context, seen }) => {
+  const manifest = JSON.parse(await readFile(path.join(root, 'assets', 'fonts', 'manifest.json'), 'utf8'));
+  const expected = manifest.families.flatMap(family => family.files
+    .filter(file => file.local.endsWith('.ttf'))
+    .map(file => ({ family: family.name, style: file.style, weight: file.weight })));
+  const loadSpec = (family, file) => {
+    const [min, max] = file.weight.split(' ').map(Number);
+    const weight = max == null ? min : (min <= 400 && 400 <= max ? 400 : min);
+    return `${file.style === 'italic' ? 'italic ' : ''}${weight} 20px "${family.name}"`;
+  };
+  const originals = ['Inter', 'Lora', 'IBM Plex Mono'];
+  const sampleFamilies = manifest.families.filter(family => originals.includes(family.name));
+  const extra = manifest.families.find(family => !originals.includes(family.name));
+  if (extra) sampleFamilies.push(extra);
+  const specs = sampleFamilies.flatMap(family => family.files.filter(file => file.local.endsWith('.ttf')).map(file => loadSpec(family, file)));
   await openApp(page);
-  const specs = [
-    '400 20px "Inter"', 'italic 400 20px "Inter"', '700 20px "Inter"', 'italic 700 20px "Inter"',
-    '400 20px "Lora"', 'italic 400 20px "Lora"', '700 20px "Lora"', 'italic 700 20px "Lora"',
-    '400 20px "IBM Plex Mono"', '700 20px "IBM Plex Mono"', 'italic 400 20px "IBM Plex Mono"', 'italic 700 20px "IBM Plex Mono"',
-  ];
-  const loaded = await page.evaluate(async specs => {
+  const loaded = await page.evaluate(async ({ specs, expected }) => {
     const counts = {};
     for (const spec of specs) counts[spec] = (await document.fonts.load(spec, 'Hamburgefonstiv')).length;
+    const faces = [...document.fonts].map(face => ({
+      family: face.family.replaceAll('"', ''), style: face.style, weight: face.weight, status: face.status,
+    }));
+    const key = face => `${face.family}\0${face.style}\0${face.weight}`;
+    const registered = new Set(faces.map(key));
     return {
       counts,
-      faces: [...document.fonts].map(face => ({ family: face.family.replaceAll('"', ''), style: face.style, weight: face.weight, status: face.status })),
+      faces,
+      missing: expected.filter(face => !registered.has(key(face))).slice(0, 5),
+      optionCount: document.querySelectorAll('#font-family option').length,
     };
-  }, specs);
+  }, { specs, expected });
   for (const spec of specs) assert.equal(loaded.counts[spec], 1, `exactly one @font-face should match ${spec}`);
-  assert.equal(loaded.faces.length, 8, `expected 8 @font-face rules, got ${JSON.stringify(loaded.faces)}`);
-  assert.ok(loaded.faces.every(face => face.status === 'loaded'), `all faces should be loaded: ${JSON.stringify(loaded.faces)}`);
+  assert.equal(loaded.faces.length, expected.length, `expected ${expected.length} @font-face rules`);
+  assert.deepEqual(loaded.missing, []);
+  assert.equal(loaded.optionCount, manifest.families.length);
+  assert.ok(loaded.faces.filter(face => originals.includes(face.family)).every(face => face.status === 'loaded'));
   const byFamily = family => loaded.faces.filter(face => face.family === family);
   assert.equal(byFamily('Inter').length, 2);
   assert.equal(byFamily('Lora').length, 2);
   assert.equal(byFamily('IBM Plex Mono').length, 4);
 
-  const fontFiles = ['inter/regular', 'inter/italic', 'lora/regular', 'lora/italic',
-    'ibm-plex-mono/regular', 'ibm-plex-mono/bold', 'ibm-plex-mono/italic', 'ibm-plex-mono/bold-italic']
-    .map(name => `/assets/fonts/${name}.ttf`);
+  const fontFiles = sampleFamilies.flatMap(family => family.files
+    .filter(file => file.local.endsWith('.ttf'))
+    .map(file => `/assets/fonts/${family.slug}/${file.local}`));
+  const catalogFiles = new Set(manifest.families.flatMap(family => family.files
+    .filter(file => file.local.endsWith('.ttf'))
+    .map(file => `/assets/fonts/${family.slug}/${file.local}`)));
   for (const file of fontFiles) {
     const response = seen.responses.find(r => r.url === ORIGIN + file);
     assert.ok(response, `${file} was never requested`);
@@ -424,12 +446,12 @@ test('fonts: all 8 faces load from this origin, no external requests, works offl
     assert.match(response.type, /^font\/ttf/, `${file} content-type`);
   }
   // Only the app shell and bundled fonts may be requested at all.
-  const allowed = new Set(['/', '/index.html', '/styles.css', '/app.js', '/model.js', '/color.js']);
+  const allowed = new Set(['/', '/index.html', '/styles.css', '/app.js', '/model.js', '/color.js', '/f.svg']);
   for (const url of seen.requests) {
     if (url.startsWith('data:')) continue;
     assert.ok(url.startsWith(ORIGIN + '/'), `request left the origin: ${url}`);
     const pathname = new URL(url).pathname;
-    assert.ok(allowed.has(pathname) || fontFiles.includes(pathname), `unexpected request: ${pathname}`);
+    assert.ok(allowed.has(pathname) || catalogFiles.has(pathname), `unexpected request: ${pathname}`);
   }
 
   // Cut the network entirely: formatting with every face must keep working.

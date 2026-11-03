@@ -41,18 +41,22 @@ node tests/browser-check.mjs
 
 ## Fonts
 
-Bundled fonts are free for commercial use under SIL OFL 1.1. Keep their
-licenses when redistributing. See [font sources and licenses](assets/fonts/README.md)
-for the font inventory and licensing details.
+520 font families are bundled with this project. Every one is
+open source and free for commercial use under the SIL Open Font License 1.1.
+Styles of the same family are not counted separately. Fonts are stored in the
+repository and the site makes no external font requests. Keep the license
+files when redistributing. See [font sources and licenses](assets/fonts/README.md)
+for the inventory, the pinned source commit, and SHA-256 checksums.
 
 ### Adding fonts
 
 1. Verify the font is open source and free for commercial use. Add its files
    and full license to a new family directory in `assets/fonts/`.
 2. Add `@font-face` rules in `styles.css` with the correct weights and styles.
+   Sources must stay relative to this site; do not point at a font CDN.
 3. Add the family to `FONTS` in `model.js` and the font selector in `index.html`.
-4. Update the expected font faces and files in `tests/browser-check.mjs`, then
-   run the unit and browser tests above.
-5. Update `assets/fonts/README.md`: one table row per family, source URLs and
-   pinned version, copyright/license details, and SHA-256 checksums. Keep all
-   family-specific documentation there; this README needs no per-font updates.
+4. Update `assets/fonts/manifest.json` and the expected faces in
+   `tests/browser-check.mjs`. `tests/fonts.test.js` checks the catalog.
+5. Run `npm test`. The optional browser check is described above.
+6. Update `assets/fonts/README.md`: one table row per family, source URLs and
+   pinned version, copyright/license details, and SHA-256 checksums.
