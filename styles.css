@@ -1,0 +1,1105 @@
+/* ==========================================================================
+   Font Journey — Minimal Typography Studio Stylesheet
+   Zero external dependencies. Self-hosted OFL fonts only:
+   Inter, Lora, and IBM Plex Mono.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Self-Hosted @font-face Declarations (SIL Open Font License)
+   -------------------------------------------------------------------------- */
+
+@font-face {
+  font-family: "Inter";
+  src: url("assets/fonts/inter/regular.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("assets/fonts/inter/italic.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Lora";
+  src: url("assets/fonts/lora/regular.ttf") format("truetype");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Lora";
+  src: url("assets/fonts/lora/italic.ttf") format("truetype");
+  font-weight: 400 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("assets/fonts/ibm-plex-mono/regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("assets/fonts/ibm-plex-mono/bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("assets/fonts/ibm-plex-mono/italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("assets/fonts/ibm-plex-mono/bold-italic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* --------------------------------------------------------------------------
+   2. Design Tokens & Root Variables
+   -------------------------------------------------------------------------- */
+
+:root {
+  color-scheme: light dark;
+
+  /* Font stacks (OFL self-hosted + system fallbacks) */
+  --font-inter: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-lora: "Lora", Georgia, "Times New Roman", Times, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-ui: var(--font-inter);
+
+  /* Warm off-white studio palette */
+  --bg-page: #faf8f5;
+  --bg-surface: #ffffff;
+  --bg-surface-subtle: #f4f1ec;
+  --bg-surface-hover: #ede9e2;
+  --bg-elevated: #ffffff;
+
+  /* Muted ink hierarchy */
+  --ink-primary: #18171c;
+  --ink-secondary: #4e4b57;
+  --ink-muted: #787484;
+  --ink-faint: #a39fae;
+
+  /* Neutral accents follow the browser's preferred color scheme. */
+  --accent: #525252;
+  --accent-hover: #404040;
+  --accent-active: #262626;
+  --accent-soft: #ededed;
+  --accent-soft-border: #d4d4d4;
+  --accent-ring: rgba(82, 82, 82, 0.28);
+  --selection-bg: #d4d4d4;
+  --selection-ink: #18171c;
+  --checker-light: #ffffff;
+  --checker-dark: #d4d4d4;
+
+  /* Fine borders & dividers */
+  --border-fine: #e5e0d8;
+  --border-strong: #cfc8be;
+  --border-focus: var(--accent);
+
+  /* Status & feedback */
+  --status-ok: #10b981;
+
+  /* Radii */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  /* Shadows */
+  --shadow-card: 0 1px 2px rgba(24, 23, 28, 0.04), 0 4px 16px rgba(24, 23, 28, 0.03);
+  --shadow-popover: 0 12px 32px -4px rgba(24, 23, 28, 0.12), 0 2px 6px rgba(24, 23, 28, 0.06);
+
+  /* Transitions */
+  --transition-fast: 140ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-page: #141414;
+    --bg-surface: #1c1c1c;
+    --bg-surface-subtle: #252525;
+    --bg-surface-hover: #303030;
+    --bg-elevated: #242424;
+
+    --ink-primary: #f5f5f5;
+    --ink-secondary: #d4d4d4;
+    --ink-muted: #a3a3a3;
+    --ink-faint: #737373;
+
+    --accent: #ffffff;
+    --accent-hover: #e5e5e5;
+    --accent-active: #d4d4d4;
+    --accent-soft: rgba(255, 255, 255, 0.1);
+    --accent-soft-border: rgba(255, 255, 255, 0.3);
+    --accent-ring: rgba(255, 255, 255, 0.25);
+    --selection-bg: #ffffff;
+    --selection-ink: #141414;
+    --checker-light: #525252;
+    --checker-dark: #262626;
+
+    --border-fine: #383838;
+    --border-strong: #525252;
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-popover: 0 12px 32px -4px rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. Reset & Base Elements
+   -------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--bg-page);
+  color: var(--ink-primary);
+  font-family: var(--font-ui);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+::selection {
+  background-color: var(--selection-bg);
+  color: var(--selection-ink);
+}
+
+/* Accessible keyboard focus */
+:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+  margin: 0;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+button:disabled,
+input:disabled,
+select:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* --------------------------------------------------------------------------
+   4. Utility Classes
+   -------------------------------------------------------------------------- */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+  line-height: 1;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.shortcut-hint {
+  display: inline-block;
+  padding: 0.1rem 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  line-height: 1.2;
+  color: var(--ink-muted);
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-fine);
+  border-radius: var(--radius-xs);
+}
+
+/* --------------------------------------------------------------------------
+   5. App Shell & Header
+   -------------------------------------------------------------------------- */
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 1.75rem;
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.35rem 0;
+  border-bottom: 1px solid var(--border-fine);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-decoration: none;
+  color: var(--ink-primary);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast);
+}
+
+.brand:hover {
+  color: var(--accent);
+}
+
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--ink-primary);
+  color: var(--bg-surface);
+  font-family: var(--font-lora);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: -0.03em;
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.brand:hover .brand-mark {
+  background-color: var(--accent);
+}
+
+.brand-name {
+  font-size: 1.05rem;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+
+.header-note {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  letter-spacing: -0.01em;
+}
+
+/* --------------------------------------------------------------------------
+   6. Main Content & Intro Section
+   -------------------------------------------------------------------------- */
+
+main {
+  flex: 1 0 auto;
+  padding: 2.5rem 0 3rem;
+}
+
+.intro {
+  max-width: 680px;
+  margin-bottom: 2.25rem;
+}
+
+.eyebrow {
+  display: inline-block;
+  margin: 0 0 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--accent);
+  background-color: var(--accent-soft);
+  border: 1px solid var(--accent-soft-border);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-pill);
+}
+
+.intro h1 {
+  margin: 0 0 0.65rem;
+  font-size: clamp(1.75rem, 3vw, 2.35rem);
+  font-weight: 650;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: var(--ink-primary);
+}
+
+.intro-copy {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--ink-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   7. Studio Workspace Layout
+   -------------------------------------------------------------------------- */
+
+.workspace {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* --------------------------------------------------------------------------
+   8. Controls Panel (Left Rail)
+   -------------------------------------------------------------------------- */
+
+.controls-panel {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-fine);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  position: relative;
+}
+
+.panel-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  color: var(--ink-primary);
+}
+
+.panel-caption {
+  margin: -0.75rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--ink-muted);
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.425rem;
+  min-width: 0;
+}
+
+.control-label,
+.color-control legend,
+.color-control-heading {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--ink-secondary);
+  margin: 0;
+  padding: 0;
+}
+
+.control-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.5rem;
+}
+
+.control-heading .text-button {
+  font-size: 0.7rem;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+/* Font Family Select */
+#font-family,
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 2.4rem;
+  padding: 0 2.1rem 0 0.75rem;
+  background-color: var(--bg-surface-subtle);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--ink-secondary) 50%),
+    linear-gradient(135deg, var(--ink-secondary) 50%, transparent 50%);
+  background-position:
+    calc(100% - 15px) 50%,
+    calc(100% - 10px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  border: 1px solid var(--border-fine);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ink-primary);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+#font-family:hover,
+select:hover {
+  border-color: var(--border-strong);
+  background-color: var(--bg-surface);
+}
+
+#font-family:focus-visible,
+select:focus-visible {
+  outline: none;
+  border-color: var(--border-focus);
+  background-color: var(--bg-surface);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+/* Control Row: Size + Style Buttons */
+.control-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.size-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.size-input input#font-size,
+.size-input input[type="number"] {
+  width: 100%;
+  height: 2.4rem;
+  padding: 0 2.15rem 0 0.7rem;
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-fine);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ink-primary);
+  transition: border-color var(--transition-fast), background-color var(--transition-fast), box-shadow var(--transition-fast);
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.size-input input#font-size::-webkit-outer-spin-button,
+.size-input input#font-size::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.size-input input#font-size:hover {
+  border-color: var(--border-strong);
+  background-color: var(--bg-surface);
+}
+
+.size-input input#font-size:focus-visible {
+  outline: none;
+  border-color: var(--border-focus);
+  background-color: var(--bg-surface);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+.size-input .unit {
+  position: absolute;
+  right: 0.65rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Format Buttons (Bold / Italic) */
+.style-buttons {
+  display: inline-flex;
+  gap: 0.375rem;
+}
+
+.format-button,
+#bold-button,
+#italic-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.4rem;
+  height: 2.4rem;
+  padding: 0 0.55rem;
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-fine);
+  border-radius: var(--radius-sm);
+  color: var(--ink-secondary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+#bold-button {
+  font-weight: 700;
+}
+
+#italic-button {
+  font-family: var(--font-lora);
+  font-style: italic;
+  font-weight: 600;
+}
+
+.format-button:hover,
+#bold-button:hover,
+#italic-button:hover {
+  background-color: var(--bg-surface-hover);
+  border-color: var(--border-strong);
+  color: var(--ink-primary);
+}
+
+.format-button[aria-pressed="true"],
+#bold-button[aria-pressed="true"],
+#italic-button[aria-pressed="true"],
+.format-button.is-active {
+  background-color: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.format-button:focus-visible,
+#bold-button:focus-visible,
+#italic-button:focus-visible {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+.control-divider {
+  height: 1px;
+  width: 100%;
+  background-color: var(--border-fine);
+  border: 0;
+  margin: 0.1rem 0;
+}
+
+/* --------------------------------------------------------------------------
+   9. Color Control & Custom HSV/RGB Popover
+   -------------------------------------------------------------------------- */
+
+.color-control {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.color-control legend {
+  float: left;
+  width: 100%;
+  margin-bottom: 0.425rem;
+}
+
+.color-control-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.color-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.35rem 0.5rem;
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-fine);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.color-summary:hover {
+  border-color: var(--border-strong);
+  background-color: var(--bg-surface);
+}
+
+.color-preview,
+.color-swatch,
+button#text-color-toggle {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-strong);
+  background-color: var(--ink-primary);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+  flex-shrink: 0;
+  padding: 0;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.color-preview:hover,
+button#text-color-toggle:hover {
+  transform: scale(1.04);
+}
+
+.color-preview:focus-visible,
+button#text-color-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--bg-surface), 0 0 0 4px var(--border-focus);
+}
+
+.color-value,
+#text-color-value {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--ink-primary);
+  letter-spacing: -0.01em;
+  user-select: all;
+}
+
+/* Color Popover */
+.color-popover {
+  margin-top: 0.35rem;
+  padding: 0.9rem;
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-popover);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.picker-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+canvas.color-wheel {
+  display: block;
+  width: 168px;
+  height: 168px;
+  border-radius: 50%;
+  cursor: crosshair;
+  box-shadow: 0 0 0 1px var(--border-fine);
+  touch-action: none;
+  user-select: none;
+}
+
+.value-control {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ink-secondary);
+}
+
+.value-control input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 0.5rem;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(to right, #000000, #ffffff);
+  border: 1px solid var(--border-strong);
+  cursor: pointer;
+}
+
+.value-control input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  border: 2px solid var(--accent);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: transform var(--transition-fast);
+}
+
+.value-control input[type="range"]::-moz-range-thumb {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  border: 2px solid var(--accent);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: transform var(--transition-fast);
+}
+
+.value-control input[type="range"]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+/* Compact RGB Number Inputs */
+.rgb-inputs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.rgb-inputs > label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.rgb-inputs input[type="number"] {
+  width: 100%;
+  height: 2rem;
+  padding: 0 0.4rem;
+  text-align: center;
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-fine);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ink-primary);
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.rgb-inputs input[type="number"]::-webkit-outer-spin-button,
+.rgb-inputs input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.rgb-inputs input[type="number"]:focus-visible {
+  outline: none;
+  border-color: var(--border-focus);
+  background-color: var(--bg-surface);
+  box-shadow: 0 0 0 2px var(--accent-ring);
+}
+
+.picker-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding-top: 0.25rem;
+  border-top: 1px solid var(--border-fine);
+}
+
+.secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-secondary);
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-fine);
+  border-radius: var(--radius-xs);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.secondary-button:hover {
+  background-color: var(--bg-surface-hover);
+  border-color: var(--border-strong);
+  color: var(--ink-primary);
+}
+
+.control-help {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ink-muted);
+}
+
+.panel-footer {
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-fine);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.text-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.45rem;
+  margin: -0.25rem -0.45rem;
+  border-radius: var(--radius-xs);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-secondary);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.text-button:hover {
+  color: var(--accent);
+  background-color: var(--accent-soft);
+}
+
+/* --------------------------------------------------------------------------
+   10. Preview Panel & Editable Typography Stage
+   -------------------------------------------------------------------------- */
+
+.preview-panel {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-fine);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.preview-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1.35rem;
+  border-bottom: 1px solid var(--border-fine);
+  background-color: var(--bg-surface-subtle);
+}
+
+.preview-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-secondary);
+  margin: 0;
+}
+
+/* Editable Specimen Stage */
+#editor,
+.editor {
+  min-height: 390px;
+  padding: 2rem 2.25rem;
+  font-family: var(--font-inter);
+  font-size: 52px;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.24;
+  letter-spacing: -0.02em;
+  color: var(--ink-primary);
+  background-color: var(--bg-surface);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  outline: none;
+  cursor: text;
+  transition: box-shadow var(--transition-fast);
+}
+
+#editor:focus,
+.editor:focus,
+#editor:focus-visible,
+.editor:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+#editor:empty::before,
+.editor:empty::before {
+  content: attr(data-placeholder);
+  color: var(--ink-faint);
+  pointer-events: none;
+}
+
+/* Preview Footer Status Bar */
+.preview-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.75rem 1.35rem;
+  border-top: 1px solid var(--border-fine);
+  background-color: var(--bg-surface-subtle);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+}
+
+#selection-status {
+  color: var(--ink-secondary);
+  font-weight: 500;
+}
+
+#character-count {
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------------------------
+   11. Workspace Note & Site Footer
+   -------------------------------------------------------------------------- */
+
+.workspace-note {
+  margin-top: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.8125rem;
+  color: var(--ink-muted);
+}
+
+.workspace-note p {
+  margin: 0;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  flex-shrink: 0;
+}
+
+.site-footer {
+  padding: 1.5rem 0 2rem;
+  border-top: 1px solid var(--border-fine);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--ink-muted);
+}
+
+.site-footer a {
+  color: var(--accent);
+}
+
+.site-footer a:hover {
+  color: var(--accent-hover);
+}
+
+.site-footer p {
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   12. Responsive Breakpoints
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 860px) {
+  .app-shell {
+    padding: 0 1.25rem;
+  }
+
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  #editor,
+  .editor {
+    min-height: 320px;
+    padding: 1.5rem;
+    font-size: 40px;
+  }
+}
+
+@media (max-width: 520px) {
+  .site-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+
+  main {
+    padding: 1.75rem 0 2.25rem;
+  }
+
+  .preview-toolbar,
+  .preview-footer {
+    padding: 0.75rem 1rem;
+  }
+
+  #editor,
+  .editor {
+    min-height: 260px;
+    padding: 1.25rem;
+    font-size: 32px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   13. Reduced Motion Preference
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,24 @@
+name: fontjourney
+
+services:
+  web:
+    build:
+      context: .
+    # Reachable from this machine only; change the host side to use another port.
+    ports:
+      - "127.0.0.1:8080:80"
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      # nginx pid file and temp dirs (see nginx.conf).
+      - /tmp:size=16m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    # Binding port 80 as the unprivileged nginx user needs this sysctl; it is
+    # Docker's default, set explicitly so the setup does not depend on it.
+    sysctls:
+      - net.ipv4.ip_unprivileged_port_start=0
+    pids_limit: 128
+    mem_limit: 128m

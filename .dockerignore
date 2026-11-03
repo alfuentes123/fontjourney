@@ -1,0 +1,13 @@
+# Allow-list: exclude everything, then re-include only what the image needs.
+# Tests, package.json, docs, git data and editor files never enter the build context.
+*
+
+!nginx.conf
+!index.html
+!f.svg
+!app.js
+!model.js
+!color.js
+!styles.css
+!assets/
+!assets/**

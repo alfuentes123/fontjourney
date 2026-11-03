@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="A quiet space to try beautiful, commercially usable open-source fonts. Type, select, and make it yours.">
+  <title>Font Journey</title>
+  <link rel="icon" type="image/svg+xml" href="f.svg">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="Font Journey home"><span class="brand-name">Font Journey</span></a>
+    </header>
+    <main>
+      <section class="intro" aria-labelledby="page-title">
+        <h1 id="page-title">Try a font, play with color, and see what feels right.</h1>
+        <p class="intro-copy">Every font here is open source and free for commercial use.</p>
+      </section>
+      <section class="workspace" aria-label="Font playground">
+        <aside class="controls-panel" aria-label="Text formatting">
+
+          <div class="control-group">
+            <div class="control-heading"><label class="control-label" for="font-family">Font family</label><button id="select-all-button" class="text-button" type="button" data-select-all>Select all text</button></div>
+            <select id="font-family"><option>Inter</option><option>Lora</option><option>IBM Plex Mono</option></select>
+          </div>
+          <div class="control-row">
+            <div class="control-group">
+              <label class="control-label" for="font-size">Size</label>
+              <div class="size-input"><input id="font-size" type="number" min="8" max="200" value="52" aria-label="Font size in pixels"><span class="unit">px</span></div>
+            </div>
+            <div class="control-group">
+              <span class="control-label" id="style-label">Style</span>
+              <div class="style-buttons" role="group" aria-labelledby="style-label">
+                <button id="bold-button" class="format-button" type="button" aria-label="Bold" aria-pressed="false" title="Bold (Ctrl/⌘ B)"><strong>B</strong></button>
+                <button id="italic-button" class="format-button" type="button" aria-label="Italic" aria-pressed="false" title="Italic (Ctrl/⌘ I)"><em>I</em></button>
+              </div>
+            </div>
+          </div>
+          <div class="control-divider"></div>
+          <fieldset class="color-control">
+            <legend class="control-label"><span class="control-heading"><span>Text color</span><button id="select-all-color-button" class="text-button" type="button" data-select-all>Select all text</button></span></legend>
+            <div class="color-summary"><button id="text-color-toggle" class="color-preview" type="button" aria-label="Choose text color" aria-expanded="false" aria-controls="text-color-picker"></button><span id="text-color-value" class="color-value">#18171C</span></div>
+            <div id="text-color-picker" class="color-popover" hidden>
+              <div class="picker-layout"><canvas id="text-wheel" class="color-wheel" width="168" height="168" tabindex="0" role="slider" aria-label="Text color hue and saturation" aria-valuemin="0" aria-valuemax="360" aria-valuenow="0" aria-describedby="wheel-help"></canvas><div class="value-control"><label for="text-brightness">Brightness</label><input id="text-brightness" type="range" min="0" max="100" value="100"></div></div>
+              <div class="rgb-inputs"><label>R<input id="text-r" type="number" min="0" max="255" step="1" aria-label="Text red"></label><label>G<input id="text-g" type="number" min="0" max="255" step="1" aria-label="Text green"></label><label>B<input id="text-b" type="number" min="0" max="255" step="1" aria-label="Text blue"></label></div>
+              <div class="picker-actions"><button class="secondary-button" type="button" data-close-picker="text">Done</button></div>
+            </div>
+          </fieldset>
+          <fieldset class="color-control">
+            <legend class="control-label">Highlight color</legend>
+            <div class="color-summary"><button id="background-color-toggle" class="color-preview" type="button" aria-label="Choose text background color" aria-expanded="false" aria-controls="background-color-picker"></button><span id="background-color-value" class="color-value">None</span></div>
+            <div id="background-color-picker" class="color-popover" hidden>
+              <div class="picker-layout"><canvas id="background-wheel" class="color-wheel" width="168" height="168" tabindex="0" role="slider" aria-label="Highlight color hue and saturation" aria-valuemin="0" aria-valuemax="360" aria-valuenow="0" aria-describedby="wheel-help"></canvas><div class="value-control"><label for="background-brightness">Brightness</label><input id="background-brightness" type="range" min="0" max="100" value="100"></div></div>
+              <div class="rgb-inputs"><label>R<input id="background-r" type="number" min="0" max="255" step="1" aria-label="Highlight red"></label><label>G<input id="background-g" type="number" min="0" max="255" step="1" aria-label="Highlight green"></label><label>B<input id="background-b" type="number" min="0" max="255" step="1" aria-label="Highlight blue"></label></div>
+              <div class="picker-actions"><button id="clear-background" class="secondary-button" type="button">Remove highlight</button><button class="secondary-button" type="button" data-close-picker="background">Done</button></div>
+            </div>
+          </fieldset>
+          <p id="wheel-help" class="sr-only">Arrow left and right change hue. Arrow up and down change saturation. Use the brightness slider for lighter or darker colors. RGB fields are an alternative.</p>
+
+          <div class="panel-footer"><button id="reset-button" class="text-button" type="button">Reset formatting</button></div>
+        </aside>
+        <div class="preview-panel">
+          <div class="preview-toolbar"><span class="preview-label" id="preview-label">Your canvas</span></div>
+          <div id="editor" class="editor" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby="preview-label" spellcheck="false"></div>
+          <div class="preview-footer"><span id="selection-status" role="status"></span><span id="character-count">0 characters</span></div>
+        </div>
+      </section>
+
+      <noscript><p>This playground needs JavaScript to edit and format text. All scripts are bundled locally.</p></noscript>
+    </main>
+    <footer class="site-footer"><a href="assets/fonts/README.md">Font sources &amp; commercial-use licenses ↗</a></footer>
+  </div>
+</body>
+</html>
