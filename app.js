@@ -3,6 +3,10 @@ import { clamp, hexToRgb, rgbToHex, rgbToHsv, hsvToRgb } from './color.js';
 
 const $ = id => document.getElementById(id);
 const editor = $('editor');
+const fontPicker = $('font-picker');
+const fontButton = $('font-family');
+const fontList = $('font-options');
+let highlightedFont = -1;
 // Keep the theme default separate from an explicitly chosen preview color.
 const resolveColor = color => color === 'auto'
   ? getComputedStyle(document.documentElement).getPropertyValue('--ink-primary').trim() : color;
@@ -72,11 +76,15 @@ function restoreSelection(focus = false) {
 }
 function render(focus = false, restore = true) {
   const fragment = document.createDocumentFragment();
-  for (const run of runs) {
+  const font = FONTS[highlightedFont];
+  const preview = font && saved.start !== saved.end
+    ? formatRange(runs, saved.start, saved.end, { font })
+    : runs;
+  for (const run of preview) {
     const span = document.createElement('span');
     span.textContent = run.text;
     Object.assign(span.style, {
-      fontFamily: `"${run.style.font}"`, fontSize: `${run.style.size}px`,
+      fontFamily: `"${font && saved.start === saved.end ? font : run.style.font}"`, fontSize: `${run.style.size}px`,
       fontWeight: run.style.bold ? '700' : '400', fontStyle: run.style.italic ? 'italic' : 'normal',
       color: run.style.color === 'auto' ? 'inherit' : run.style.color, backgroundColor: run.style.background,
     });
@@ -93,7 +101,7 @@ function currentStyle() {
 }
 function updateToolbar() {
   const style = currentStyle();
-  if (document.activeElement !== $('font-family')) $('font-family').value = style.font ?? '';
+  fontButton.textContent = style.font ?? 'Mixed';
   if (document.activeElement !== $('font-size')) $('font-size').value = style.size ?? '';
   $('font-size').placeholder = style.size === null ? 'Mixed' : '52';
   for (const key of ['bold', 'italic']) $(key + '-button').setAttribute('aria-pressed', style[key] === null ? 'mixed' : String(style[key]));
@@ -243,7 +251,105 @@ function createPicker(name, key) {
 pickers.text = createPicker('text', 'color');
 pickers.background = createPicker('background', 'background');
 
-$('font-family').addEventListener('change', event => { if (FONTS.includes(event.target.value)) apply({ font: event.target.value }); });
+const fontOptions = FONTS.map((font, index) => {
+  const option = document.createElement('div');
+  option.id = `font-option-${index}`;
+  option.dataset.index = index;
+  option.setAttribute('role', 'option');
+  option.textContent = font;
+  return option;
+});
+fontList.append(...fontOptions);
+let fontSearch = '';
+let lastFontKey = 0;
+
+function markSelectedFont() {
+  const selected = currentStyle().font;
+  fontOptions.forEach((option, index) => option.setAttribute('aria-selected', String(FONTS[index] === selected)));
+}
+
+function highlightFont(index, scroll = false) {
+  if (index !== highlightedFont) {
+    fontOptions[highlightedFont]?.classList.remove('highlighted');
+    highlightedFont = index;
+    const option = fontOptions[index];
+    option.classList.add('highlighted');
+    fontButton.setAttribute('aria-activedescendant', option.id);
+    render();
+  }
+  if (scroll) fontOptions[index].scrollIntoView({ block: 'nearest' });
+}
+
+function openFonts() {
+  readSelection();
+  fontList.hidden = false;
+  fontButton.setAttribute('aria-expanded', 'true');
+  markSelectedFont();
+  const selected = fontOptions[FONTS.indexOf(currentStyle().font)];
+  fontList.scrollTop = selected?.offsetTop ?? 0;
+}
+
+function closeFonts() {
+  fontSearch = '';
+  fontList.hidden = true;
+  fontButton.setAttribute('aria-expanded', 'false');
+  fontButton.removeAttribute('aria-activedescendant');
+  if (highlightedFont === -1) return;
+  fontOptions[highlightedFont].classList.remove('highlighted');
+  highlightedFont = -1;
+  render();
+}
+
+function chooseFont(index) {
+  const font = FONTS[index];
+  if (font !== currentStyle().font) apply({ font });
+  highlightFont(index);
+  markSelectedFont();
+}
+
+fontButton.addEventListener('click', () => { if (fontList.hidden) openFonts(); });
+fontList.addEventListener('mousedown', event => {
+  if (event.target.closest('[role="option"]')) event.preventDefault();
+});
+fontList.addEventListener('pointerover', event => {
+  const option = event.target.closest('[role="option"]');
+  if (option && event.pointerType !== 'touch') highlightFont(Number(option.dataset.index));
+});
+fontList.addEventListener('click', event => {
+  const option = event.target.closest('[role="option"]');
+  if (option) chooseFont(Number(option.dataset.index));
+});
+document.addEventListener('click', event => {
+  if (!fontList.hidden && !fontPicker.contains(event.target)) {
+    readSelection();
+    closeFonts();
+  }
+});
+fontButton.addEventListener('keydown', event => {
+  if (event.key === 'Tab' || event.key === 'Escape') {
+    if (!fontList.hidden) closeFonts();
+  } else if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    if (fontList.hidden) openFonts();
+    else if (highlightedFont !== -1) chooseFont(highlightedFont);
+  } else if (['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
+    event.preventDefault();
+    if (fontList.hidden) openFonts();
+    const current = highlightedFont === -1 ? FONTS.indexOf(currentStyle().font) : highlightedFont;
+    let next = current + (event.key === 'ArrowDown' ? 1 : -1);
+    if (event.key === 'Home') next = 0;
+    if (event.key === 'End') next = FONTS.length - 1;
+    highlightFont(clamp(next, 0, FONTS.length - 1), true);
+  } else if (/^[a-z0-9]$/i.test(event.key) && !event.ctrlKey && !event.altKey && !event.metaKey) {
+    event.preventDefault();
+    if (fontList.hidden) openFonts();
+    if (event.timeStamp - lastFontKey > 700) fontSearch = '';
+    fontSearch += event.key.toLowerCase();
+    lastFontKey = event.timeStamp;
+    const index = FONTS.findIndex(font => font.toLowerCase().startsWith(fontSearch));
+    if (index !== -1) highlightFont(index, true);
+  }
+});
 $('font-size').addEventListener('input', event => {
   const input = event.target;
   if (input.value && input.validity.valid) apply({ size: Number(input.value) });

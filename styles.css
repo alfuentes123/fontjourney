@@ -6657,9 +6657,12 @@ main {
   white-space: nowrap;
 }
 
-/* Font Family Select */
-#font-family,
-select {
+/* Font picker */
+#font-picker {
+  position: relative;
+}
+
+#font-family {
   appearance: none;
   -webkit-appearance: none;
   width: 100%;
@@ -6678,23 +6681,51 @@ select {
   border-radius: var(--radius-sm);
   font-size: 0.875rem;
   font-weight: 500;
+  text-align: left;
   color: var(--ink-primary);
   cursor: pointer;
   transition: border-color var(--transition-fast), background-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-#font-family:hover,
-select:hover {
+#font-family:hover {
   border-color: var(--border-strong);
   background-color: var(--bg-surface);
 }
 
-#font-family:focus-visible,
-select:focus-visible {
+#font-family:focus-visible {
   outline: none;
   border-color: var(--border-focus);
   background-color: var(--bg-surface);
   box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+#font-options {
+  position: absolute;
+  inset: calc(100% + 0.25rem) 0 auto;
+  z-index: 2;
+  max-height: min(16rem, 40vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card);
+  font-size: 0.875rem;
+}
+
+#font-options [role="option"] {
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+}
+
+#font-options [aria-selected="true"] {
+  font-weight: 700;
+}
+
+#font-options .highlighted {
+  background: var(--bg-surface-subtle);
+  outline: 1px solid var(--border-focus);
+  outline-offset: -1px;
 }
 
 /* Control Row: Size + Style Buttons */

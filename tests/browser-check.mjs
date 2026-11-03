@@ -100,7 +100,7 @@ const readState = page => page.evaluate(() => {
 const readToolbar = page => page.evaluate(() => {
   const $ = id => document.getElementById(id);
   return {
-    font: $('font-family').selectedIndex === -1 ? '' : $('font-family').value,
+    font: $('font-family').textContent === 'Mixed' ? '' : $('font-family').textContent,
     size: $('font-size').value, sizePlaceholder: $('font-size').placeholder,
     bold: $('bold-button').getAttribute('aria-pressed'),
     italic: $('italic-button').getAttribute('aria-pressed'),
@@ -420,7 +420,7 @@ test('fonts: catalog is local, sample faces load, no external requests, works of
       counts,
       faces,
       missing: expected.filter(face => !registered.has(key(face))).slice(0, 5),
-      optionCount: document.querySelectorAll('#font-family option').length,
+      optionCount: document.querySelectorAll('#font-options [role="option"]').length,
     };
   }, { specs, expected });
   for (const spec of specs) assert.equal(loaded.counts[spec], 1, `exactly one @font-face should match ${spec}`);
@@ -460,12 +460,47 @@ test('fonts: catalog is local, sample faces load, no external requests, works of
   await page.click('#bold-button');
   await page.click('#italic-button');
   for (const family of ['Lora', 'IBM Plex Mono', 'Inter']) {
-    await page.selectOption('#font-family', family);
+    await chooseFont(page, family);
     const state = await readState(page);
     assert.ok(state.chars.every(c => c.style.font === family && c.style.weight === '700' && c.style.italic === 'italic'), `all text should be bold italic ${family}`);
     assert.equal(await page.evaluate(spec => document.fonts.check(spec), `italic 700 20px "${family}"`), true, `${family} bold italic available offline`);
   }
   assert.deepStrictEqual(seen.externalRequests, []);
+});
+
+async function chooseFont(page, family) {
+  await page.click('#font-family');
+  await page.getByRole('option', { name: family, exact: true }).click();
+  await page.press('#font-family', 'Escape');
+}
+
+test('font picker previews highlights and stays open after choosing', async page => {
+  await openApp(page);
+  await select(page, 0, 4);
+  const picker = page.locator('#font-family');
+  const fonts = async () => (await readState(page)).chars.map(char => char.style.font);
+  await picker.click();
+  await page.getByRole('option', { name: 'Lora', exact: true }).hover();
+  assert.deepEqual((await fonts()).slice(0, 5), ['Lora', 'Lora', 'Lora', 'Lora', 'Inter']);
+  assert.equal(await picker.textContent(), 'Inter');
+  await picker.press('ArrowDown');
+  assert.equal((await fonts())[0], 'IBM Plex Mono');
+  await picker.press('Enter');
+  assert.equal(await picker.getAttribute('aria-expanded'), 'true');
+  assert.equal(await picker.textContent(), 'IBM Plex Mono');
+  await page.getByRole('option', { name: 'Lora', exact: true }).click();
+  assert.equal(await picker.getAttribute('aria-expanded'), 'true');
+  await picker.press('ArrowDown');
+  assert.equal((await fonts())[0], 'IBM Plex Mono');
+  await page.locator('#page-title').click();
+  assert.equal(await picker.getAttribute('aria-expanded'), 'false');
+  assert.equal((await fonts())[0], 'Lora');
+  await page.press('#editor', 'Control+z');
+  assert.equal((await fonts())[0], 'IBM Plex Mono');
+  await picker.press('l');
+  assert.equal((await fonts())[0], 'Lora');
+  await picker.press('Escape');
+  assert.equal((await fonts())[0], 'IBM Plex Mono');
 });
 
 test('partial selection via keyboard: font, size, bold, italic keep the selection', async page => {
@@ -480,7 +515,7 @@ test('partial selection via keyboard: font, size, bold, italic keep the selectio
   const [start, end] = BEST;
   const patches = [];
 
-  await page.selectOption('#font-family', 'Lora');
+  await chooseFont(page, 'Lora');
   patches.push([start, end, { font: 'Lora' }]);
   expectStyles(await readState(page), patches);
   assert.equal((await readToolbar(page)).status, '4 characters selected', 'selection kept after font change');
@@ -718,7 +753,7 @@ test('collapsed caret: toolbar choices apply to the next letters only', async pa
   assert.equal((await readToolbar(page)).status, '');
   await page.click('#bold-button');
   await page.fill('#font-size', '30');
-  await page.selectOption('#font-family', 'IBM Plex Mono');
+  await chooseFont(page, 'IBM Plex Mono');
   await setRgb(page, 'text', [200, 0, 0]);
   await setRgb(page, 'background', [255, 235, 59]);
   assert.equal((await readState(page)).text, INITIAL_TEXT, 'a collapsed caret changes no existing text');
@@ -894,7 +929,7 @@ test('undo / redo for formatting and typing', async page => {
   await openApp(page);
   await select(page, ...BEST);
   await page.click('#bold-button');
-  await page.selectOption('#font-family', 'Lora');
+  await chooseFont(page, 'Lora');
   expectStyles(await readState(page), [[4, 8, { weight: '700', font: 'Lora' }]]);
   await page.evaluate(() => document.getElementById('editor').focus());
 
@@ -937,7 +972,7 @@ test('undo / redo for formatting and typing', async page => {
 test('reset formatting keeps the text, and can be undone', async page => {
   await openApp(page);
   await select(page, ...BEST);
-  await page.selectOption('#font-family', 'IBM Plex Mono');
+  await chooseFont(page, 'IBM Plex Mono');
   await page.click('#bold-button');
   await setRgb(page, 'text', [0, 128, 255]);
   await setRgb(page, 'background', [250, 240, 100]);
@@ -993,7 +1028,7 @@ test('select all button and mixed-state toolbar', async page => {
   await select(page, ...BEST);
   await page.click('#italic-button');
   await select(page, 0, 3);
-  await page.selectOption('#font-family', 'Lora');
+  await chooseFont(page, 'Lora');
   await page.fill('#font-size', '30');
   await setRgb(page, 'text', [10, 20, 30]);
   await page.click('#select-all-button');
@@ -1017,7 +1052,7 @@ test('font and color select-all buttons share selection behavior', async page =>
   await openApp(page);
   assert.equal(await page.locator('[data-select-all]').count(), 2);
   assert.equal(await page.locator('.preview-toolbar [data-select-all]').count(), 0);
-  assert.equal(await page.locator('#font-family').locator('..').locator('[data-select-all]').count(), 1);
+  assert.equal(await page.locator('#font-family').locator('xpath=../..').locator('[data-select-all]').count(), 1);
   assert.equal(await page.locator('.color-control').first().locator('[data-select-all]').count(), 1);
   for (const button of ['#select-all-button', '#select-all-color-button']) {
     await select(page, ...BEST);
@@ -1068,7 +1103,7 @@ for (const [width, mobile] of [[320, true], [375, true], [414, true], [768, fals
     const editorBox = await page.locator('#editor').boundingBox();
     assert.ok(editorBox.x >= -1 && editorBox.x + editorBox.width <= width + 1, `editor stays within ${width}px: ${JSON.stringify(editorBox)}`);
 
-    await page.selectOption('#font-family', 'IBM Plex Mono');
+    await chooseFont(page, 'IBM Plex Mono');
     await page.click('#bold-button');
     await settle(page);
     await assertNoOverflow(page, width, 'monospace bold long text');

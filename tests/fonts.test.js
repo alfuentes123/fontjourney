@@ -163,8 +163,7 @@ test('every bundled file matches its checksum, license, and font structure', asy
 test('app wiring stays local and matches the catalog', async () => {
   assert.deepEqual([...FONTS], manifest.families.map(family => family.name));
   const html = await readFile(path.join(root, 'index.html'), 'utf8');
-  const options = [...html.matchAll(/<option>([^<]*)<\/option>/g)].map(match => match[1]);
-  assert.deepEqual(options, manifest.families.map(family => family.name));
+  assert.match(html, /id="font-options" role="listbox"/);
   const css = await readFile(path.join(root, 'styles.css'), 'utf8');
   assert.equal(css.includes('http://'), false);
   assert.equal(css.includes('https://'), false);
