@@ -310,11 +310,10 @@ test('SVG favicon is linked and served with the correct content type', async pag
 test('branding and simplified page copy', async page => {
   await openApp(page);
   assert.equal(await page.title(), 'Font Journey');
-  assert.equal(await page.locator('.brand').textContent(), 'Font Journey');
-  assert.equal(await page.locator('h1').textContent(), 'Try a font, play with color, and see what feels right.');
-  assert.equal(await page.locator('.intro-copy').textContent(), 'Every font here is open source and free for commercial use.');
-  assert.equal(await page.locator('.brand-mark, .header-note, .eyebrow, .panel-title, .panel-caption, .control-help, .workspace-note').count(), 0);
-  assert.equal(await page.locator('.site-footer').textContent(), 'Font sources & commercial-use licenses ↗');
+  assert.equal(await page.locator('h1').textContent(), 'Font Journey');
+  assert.equal(await page.locator('.intro-copy').textContent(), 'Type a sample, then select text to change its font, size, or color.');
+  assert.equal(await page.locator('.site-footer p').textContent(), 'Every font here is open source and free for commercial use.');
+  assert.equal(await page.locator('.site-footer a').textContent(), 'Font sources and licenses');
   assert.equal((await readToolbar(page)).status, '');
   assert.equal(await page.locator('#editor').getAttribute('aria-describedby'), null);
 });
@@ -1048,20 +1047,14 @@ test('select all button and mixed-state toolbar', async page => {
   assert.equal((await readState(page)).text, INITIAL_TEXT);
 });
 
-test('font and color select-all buttons share selection behavior', async page => {
+test('select all in the specimen toolbar applies color to the entire sample', async page => {
   await openApp(page);
-  assert.equal(await page.locator('[data-select-all]').count(), 2);
-  assert.equal(await page.locator('.preview-toolbar [data-select-all]').count(), 0);
-  assert.equal(await page.locator('#font-family').locator('xpath=../..').locator('[data-select-all]').count(), 1);
-  assert.equal(await page.locator('.color-control').first().locator('[data-select-all]').count(), 1);
-  for (const button of ['#select-all-button', '#select-all-color-button']) {
-    await select(page, ...BEST);
-    await page.click(button);
-    await settle(page);
-    assert.equal(await page.evaluate(() => getSelection().toString()), INITIAL_TEXT);
-    assert.equal(await page.evaluate(() => document.activeElement.id), 'editor');
-    assert.equal((await readToolbar(page)).status, `${INITIAL_TEXT.length} characters selected`);
-  }
+  await select(page, ...BEST);
+  await page.locator('.preview-toolbar #select-all-button').click();
+  await settle(page);
+  assert.equal(await page.evaluate(() => getSelection().toString()), INITIAL_TEXT);
+  assert.equal(await page.evaluate(() => document.activeElement.id), 'editor');
+  assert.equal((await readToolbar(page)).status, INITIAL_TEXT.length + ' characters selected');
   await setRgb(page, 'text', [100, 50, 200]);
   expectStyles(await readState(page), [[0, INITIAL_TEXT.length, { color: 'rgb(100, 50, 200)' }]]);
 });
@@ -1076,12 +1069,10 @@ for (const [width, mobile] of [[320, true], [375, true], [414, true], [768, fals
       await select(page, ...BEST);
       await page.tap('#bold-button');
       expectStyles(await readState(page), [[4, 8, { weight: '700' }]]);
-      for (const button of ['#select-all-button', '#select-all-color-button']) {
-        await select(page, ...BEST);
-        await page.tap(button);
-        await settle(page);
-        assert.equal((await readToolbar(page)).status, `${INITIAL_TEXT.length} characters selected`);
-      }
+      await select(page, ...BEST);
+      await page.tap('#select-all-button');
+      await settle(page);
+      assert.equal((await readToolbar(page)).status, INITIAL_TEXT.length + ' characters selected');
     }
 
     await page.click('#text-color-toggle');
