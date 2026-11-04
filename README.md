@@ -4,6 +4,9 @@ A minimal font playground with selection formatting, RGB and color-wheel
 controls. No runtime dependencies or build step.
 Fonts are bundled locally, nothing is uploaded or saved.
 
+<img width="987" height="525" alt="font-journey" src="https://github.com/user-attachments/assets/24a7a214-9d51-48e4-bce2-f28915d89d14" />
+
+
 ## Run locally
 
 Clone this repository and open its directory. With **Node.js 22+** installed, run:
