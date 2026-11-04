@@ -107,7 +107,7 @@ function updateToolbar() {
   for (const key of ['bold', 'italic']) $(key + '-button').setAttribute('aria-pressed', style[key] === null ? 'mixed' : String(style[key]));
   for (const [name, key] of [['text', 'color'], ['background', 'background']]) {
     const color = resolveColor(style[key]);
-    $(name + '-color-toggle').style.background = !color || color === 'transparent'
+    $(name + '-color-toggle').querySelector('.color-preview').style.background = !color || color === 'transparent'
       ? 'repeating-conic-gradient(var(--checker-dark) 0% 25%, var(--checker-light) 0% 50%) 0 / 10px 10px' : color;
     $(name + '-color-value').textContent = color === null ? 'Mixed' : color === 'transparent' ? 'None' : color.toUpperCase();
     pickers[name]?.sync(color);
@@ -360,12 +360,10 @@ $('font-size').addEventListener('change', () => {
 });
 for (const key of ['bold', 'italic']) $(key + '-button').addEventListener('click', () => apply({ [key]: currentStyle()[key] !== true }));
 $('clear-background').addEventListener('click', () => apply({ background: 'transparent' }));
-document.querySelectorAll('[data-select-all]').forEach(button => {
-  button.addEventListener('click', () => {
-    saved = { start: 0, end: textOf(runs).length };
-    pending = styleAt(runs, 0);
-    restoreSelection(true); updateToolbar();
-  });
+$('select-all-button').addEventListener('click', () => {
+  saved = { start: 0, end: textOf(runs).length };
+  pending = styleAt(runs, 0);
+  restoreSelection(true); updateToolbar();
 });
 $('reset-button').addEventListener('click', () => {
   remember();
